@@ -55,6 +55,30 @@ class FPM::Package::NPM < FPM::Package
 
     safesystem(*install_args)
 
+##### lets check for npm peer dependency errors
+#####
+
+    stderr_r_str = nil
+    exit_code = execmd([attributes[:npm_bin], "ls", "--json", "--long", *npm_flags], :stdin=>false, :stdout=>false) do |stderr|
+      stderr_r_str = stderr.read
+    end
+    success = (exit_code == 0)
+
+    if !success
+      if stderr_r_str =~ /npm ERR! peer dep missing: ([a-z]+@~?\d+.\d+.\d+),/
+        peer_dep_install_args = [
+          attributes[:npm_bin],
+          "install",
+          $1
+        ]
+	peer_dep_install_args += npm_flags
+        npm_install_out = safesystemout(*peer_dep_install_args)
+      end
+    end
+
+#####
+#####
+
     # Query details about our now-installed package.
     # We do this by using 'npm ls' with json + long enabled to query details
     # about the installed package.
