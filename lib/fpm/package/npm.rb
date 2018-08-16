@@ -59,19 +59,21 @@ class FPM::Package::NPM < FPM::Package
 #####
 
     stderr_r_str = nil
-    exit_code = execmd([attributes[:npm_bin], "ls", "--json", "--long", *npm_flags], :stdin=>false, :stdout=>false) do |stderr|
+    exit_code = execmd([attributes[:npm_bin], "ls", "--json", "--long", *npm_flags], :process=>true, :stdin=>true, :stdout=>true, :stderr=>true) do |process,stdin,stdout,stderr|
+      stdout_r_str = stdout.read
       stderr_r_str = stderr.read
     end
     success = (exit_code == 0)
 
     if !success
+      logger.debug("Checking for 'npm ERR peer dep missing'", "stderr" => stderr_r_str)
       if stderr_r_str =~ /npm ERR! peer dep missing: ([a-z]+@~?\d+.\d+.\d+),/
         peer_dep_install_args = [
           attributes[:npm_bin],
           "install",
           $1
-        ]
-	peer_dep_install_args += npm_flags
+	]
+        peer_dep_install_args += npm_flags
         npm_install_out = safesystemout(*peer_dep_install_args)
       end
     end
