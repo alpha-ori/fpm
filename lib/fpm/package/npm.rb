@@ -24,7 +24,7 @@ class FPM::Package::NPM < FPM::Package
     settings = {
       "cache" => build_path("npm_cache"),
       "loglevel" => "warn",
-      "global" => "true"
+      "global" => "false"
     }
 
     settings["registry"] = attributes[:npm_registry] if attributes[:npm_registry_given?]
