@@ -24,7 +24,9 @@ class FPM::Package::NPM < FPM::Package
     settings = {
       "cache" => build_path("npm_cache"),
       "loglevel" => "warn",
-      "global" => "false"
+      "global" => "false",
+      "global-style" => "true"
+
     }
 
     settings["registry"] = attributes[:npm_registry] if attributes[:npm_registry_given?]
@@ -45,7 +47,7 @@ class FPM::Package::NPM < FPM::Package
       attributes[:npm_bin],
       "install",
       # use 'package' or 'package@version'
-     (version ? "#{package}@#{version}" : package)
+      (version ? "#{package}@#{version}" : package)
     ]
 
     # The only way to get npm to respect the 'prefix' setting appears to
@@ -55,9 +57,10 @@ class FPM::Package::NPM < FPM::Package
 
     safesystem(*install_args)
 
-##### lets check for npm peer dependency errors
+##### lets check for npm errors (peer dependency & extraneous)
 #####
 
+    logger.debug("npm ls checking for 'npm ERR'")
     stderr_r_str = nil
     exit_code = execmd([attributes[:npm_bin], "ls", "--json", "--long", *npm_flags], :process=>true, :stdin=>true, :stdout=>true, :stderr=>true) do |process,stdin,stdout,stderr|
       stdout_r_str = stdout.read
@@ -66,6 +69,7 @@ class FPM::Package::NPM < FPM::Package
     success = (exit_code == 0)
 
     if !success
+
       logger.debug("Checking for 'npm ERR peer dep missing'", "stderr" => stderr_r_str)
       if stderr_r_str =~ /npm ERR! peer dep missing: ([a-z]+@~?\d+.\d+.\d+),/
         peer_dep_install_args = [
@@ -75,7 +79,20 @@ class FPM::Package::NPM < FPM::Package
 	]
         peer_dep_install_args += npm_flags
         npm_install_out = safesystemout(*peer_dep_install_args)
+        logger.debug("npm install output", "stdout" => npm_install_out)
       end
+
+      logger.debug("Checking for 'npm ERR! extraneous'", "stderr" => stderr_r_str)
+      if stderr_r_str =~ /npm ERR! extraneous:/
+        prune_args = [
+          attributes[:npm_bin],
+          "prune"
+	]
+        prune_args += npm_flags
+        npm_prune_out = safesystemout(*prune_args)
+        logger.debug("npm prune output", "stdout" => npm_prune_out)
+      end
+
     end
 
 #####
