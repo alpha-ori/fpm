@@ -91,6 +91,7 @@ class FPM::Package::NPM < FPM::Package
         prune_args += npm_flags
         npm_prune_out = safesystemout(*prune_args)
         logger.debug("npm prune output", "stdout" => npm_prune_out)
+        ignore_npm_error = true
       end
 
     end
@@ -101,7 +102,13 @@ class FPM::Package::NPM < FPM::Package
     # Query details about our now-installed package.
     # We do this by using 'npm ls' with json + long enabled to query details
     # about the installed package.
-    npm_ls_out = safesystemout(attributes[:npm_bin], "ls", "--json", "--long", *npm_flags)
+
+    if ignore_npm_error = true
+      exit_code = execmd([attributes[:npm_bin], "ls", "--json", "--long", *npm_flags], :process=>true, :stdin=>true, :stdout=>true, :stderr=>true) do |process,stdin,stdout,stderr|
+      npm_ls_out = stdout.read
+    else
+      npm_ls_out = safesystemout(attributes[:npm_bin], "ls", "--json", "--long", *npm_flags)
+    end
     npm_ls = JSON.parse(npm_ls_out)
     name, info = npm_ls["dependencies"].first
 
