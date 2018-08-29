@@ -103,7 +103,7 @@ class FPM::Package::NPM < FPM::Package
     # We do this by using 'npm ls' with json + long enabled to query details
     # about the installed package.
 
-    if ignore_npm_error = true
+    if ignore_npm_error == true
       exit_code = execmd([attributes[:npm_bin], "ls", "--json", "--long", *npm_flags], :process=>true, :stdin=>true, :stdout=>true, :stderr=>true) do |process,stdin,stdout,stderr|
       npm_ls_out = stdout.read
     else
