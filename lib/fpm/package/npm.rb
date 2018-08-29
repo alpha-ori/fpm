@@ -92,6 +92,7 @@ class FPM::Package::NPM < FPM::Package
         npm_prune_out = safesystemout(*prune_args)
         logger.debug("npm prune output", "stdout" => npm_prune_out)
         ignore_npm_error = true
+        logger.debug("setting ignore_npm_error to true", "stdout" => npm_prune_out)
       end
 
     end
@@ -103,12 +104,15 @@ class FPM::Package::NPM < FPM::Package
     # We do this by using 'npm ls' with json + long enabled to query details
     # about the installed package.
 
-    if ignore_npm_error == true
-      exit_code = execmd([attributes[:npm_bin], "ls", "--json", "--long", *npm_flags], :process=>true, :stdin=>true, :stdout=>true, :stderr=>true) do |process,stdin,stdout,stderr|
-      npm_ls_out = stdout.read
-    else
+    if defined?(ignore_npm_error).nil?
       npm_ls_out = safesystemout(attributes[:npm_bin], "ls", "--json", "--long", *npm_flags)
+    else
+      logger.debug("ignoring errors from npm ls...", "ignore_npm_error" => ignore_npm_error)
+      exit_code = execmd([attributes[:npm_bin], "ls", "--json", "--long", *npm_flags], :process=>false, :stdin=>false, :stdout=>true, :stderr=>false) do |stdout|
+      npm_ls_out = stdout.read
+      end
     end
+
     npm_ls = JSON.parse(npm_ls_out)
     name, info = npm_ls["dependencies"].first
 
