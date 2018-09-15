@@ -23,7 +23,7 @@ class FPM::Package::NPM < FPM::Package
     # * npm respects PREFIX
     settings = {
       "cache" => build_path("npm_cache"),
-      "loglevel" => "silly",
+      "loglevel" => "verbose",
       "global" => "false",
       "global-style" => "true"
     }
