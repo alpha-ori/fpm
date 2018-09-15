@@ -94,7 +94,8 @@ class FPM::Package::NPM < FPM::Package
       if stderr_r_str =~ /npm ERR! extraneous:/
         prune_args = [
           attributes[:npm_bin],
-          "prune"
+          "prune",
+          "-v"
 	]
         prune_args += npm_flags
         npm_prune_out = safesystemout(*prune_args)
