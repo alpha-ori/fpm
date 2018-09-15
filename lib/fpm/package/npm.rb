@@ -60,6 +60,15 @@ class FPM::Package::NPM < FPM::Package
 ##### lets check for npm errors (peer dependency & extraneous)
 #####
 
+    logger.debug("npm config ls -l")
+    stdout_r_str = nil
+    stderr_r_str = nil
+    exit_code = execmd([attributes[:npm_bin], "config", "ls", "-l", *npm_flags], :process=>true, :stdin=>true, :stdout=>true, :stderr=>true) do |process,stdin,stdout,stderr|
+      stdout_r_str = stdout.read
+      stderr_r_str = stderr.read
+    end
+    logger.debug("npm config ls -l output...", "stdout" => stdout_r_str)
+
     logger.debug("npm ls checking for 'npm ERR'")
     stderr_r_str = nil
     exit_code = execmd([attributes[:npm_bin], "ls", "--json", "--long", *npm_flags], :process=>true, :stdin=>true, :stdout=>true, :stderr=>true) do |process,stdin,stdout,stderr|
