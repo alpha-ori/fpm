@@ -87,7 +87,7 @@ class FPM::Package::NPM < FPM::Package
 	]
         peer_dep_install_args += npm_flags
         npm_install_out = safesystemout(*peer_dep_install_args)
-        logger.debug("npm install output", "stdout" => npm_install_out)
+        logger.debug("npm install out", "npm_install_out" => npm_install_out)
       end
 
       logger.debug("Checking for 'npm ERR! extraneous'", "stderr" => stderr_r_str)
@@ -98,9 +98,9 @@ class FPM::Package::NPM < FPM::Package
 	]
         prune_args += npm_flags
         npm_prune_out = safesystemout(*prune_args)
-        logger.debug("npm prune output", "stdout" => npm_prune_out)
+        logger.debug("npm prune out", "npm_prune_out" => npm_prune_out)
         ignore_npm_error = true
-        logger.debug("setting ignore_npm_error to true", "stdout" => npm_prune_out)
+        logger.debug("setting ignore_npm_error to true", "ignore_npm_error" => ignore_npm_error)
       end
 
     end
