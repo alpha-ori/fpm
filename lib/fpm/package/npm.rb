@@ -26,7 +26,6 @@ class FPM::Package::NPM < FPM::Package
       "loglevel" => "silly",
       "global" => "false",
       "global-style" => "true"
-
     }
 
     settings["registry"] = attributes[:npm_registry] if attributes[:npm_registry_given?]
@@ -118,7 +117,7 @@ class FPM::Package::NPM < FPM::Package
     else
       logger.debug("ignoring errors from npm ls...", "ignore_npm_error" => ignore_npm_error)
       exit_code = execmd([attributes[:npm_bin], "ls", "--json", "--long", *npm_flags], :process=>false, :stdin=>false, :stdout=>true, :stderr=>false) do |stdout|
-      npm_ls_out = stdout.read
+        npm_ls_out = stdout.read
       end
     end
 
